@@ -37,7 +37,7 @@
 
     <script>
         const quizData = {{.QuestionsJSON}};
-        const timeLimit = {{.TimeLimit}};
+        const timeLimits = {{.TimeLimitsJSON}};
 
         const startBtn = document.getElementById('start-btn');
         const quizStartContainer = document.getElementById('quiz-start');
@@ -52,14 +52,13 @@
         let currentQuestionIndex = 0;
         let score = 0;
         let timer;
-        let timeLeft = timeLimit;
+        let timeLeft;
 
         startBtn.addEventListener('click', startQuiz);
 
         function startQuiz() {
             quizStartContainer.style.display = 'none';
             quizContainer.style.display = 'block';
-            startTimer();
             showQuestion();
         }
 
@@ -67,6 +66,10 @@
             resetState();
             const question = quizData[currentQuestionIndex];
             questionText.innerText = question.text;
+
+            // Set the timer for the current question type
+            timeLeft = timeLimits[question.type];
+            startTimer();
 
             if (question.type === 'true_false') {
                 const trueButton = document.createElement('button');
@@ -93,12 +96,14 @@
         }
 
         function resetState() {
+            clearInterval(timer); // Clear previous timer
             while (optionsContainer.firstChild) {
                 optionsContainer.removeChild(optionsContainer.firstChild);
             }
         }
 
         function selectAnswer(selectedAnswer) {
+            clearInterval(timer); // Stop the timer when an answer is selected
             const correct = quizData[currentQuestionIndex].answer;
             const isCorrect = selectedAnswer === correct;
 
@@ -106,6 +111,7 @@
                 score++;
             }
 
+            // Provide visual feedback
             Array.from(optionsContainer.children).forEach(button => {
                 const answer = button.innerText === 'True' ? true : (button.innerText === 'False' ? false : button.innerText);
                 if (answer === correct) {
@@ -116,14 +122,33 @@
                 button.disabled = true;
             });
 
-            setTimeout(() => {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < quizData.length) {
-                    showQuestion();
-                } else {
-                    endQuiz();
+            // Move to the next question after a delay
+            setTimeout(goToNextQuestion, 1500);
+        }
+
+        function handleTimeout() {
+            clearInterval(timer);
+            // Highlight the correct answer automatically
+            const correct = quizData[currentQuestionIndex].answer;
+            Array.from(optionsContainer.children).forEach(button => {
+                const answer = button.innerText === 'True' ? true : (button.innerText === 'False' ? false : button.innerText);
+                if (answer === correct) {
+                    button.classList.add('correct');
                 }
-            }, 1500);
+                button.disabled = true;
+            });
+
+            // Move to the next question after a delay
+            setTimeout(goToNextQuestion, 1500);
+        }
+
+        function goToNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                endQuiz();
+            }
         }
 
         function startTimer() {
@@ -131,8 +156,8 @@
             timer = setInterval(() => {
                 timeLeft--;
                 timerEl.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    endQuiz();
+                if (timeLeft < 0) {
+                    handleTimeout(); // Handle time running out
                 }
             }, 1000);
         }

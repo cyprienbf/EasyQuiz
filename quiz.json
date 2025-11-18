@@ -1,7 +1,10 @@
 {
   "title": "General Knowledge Quiz",
   "image_url": "https://via.placeholder.com/150",
-  "time_limit": 120,
+  "time_limits_per_type": {
+    "true_false": 10,
+    "multiple_choice": 20
+  },
   "questions": [
     {
       "type": "true_false",
