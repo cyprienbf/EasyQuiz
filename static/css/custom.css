@@ -1,0 +1,34 @@
+/* Custom styles */
+.logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.question-container {
+    margin-top: 2rem;
+}
+
+.option {
+    display: block;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.option.correct {
+    background-color: #43a047; /* Green */
+    color: white;
+    border-color: #43a047;
+}
+
+.option.incorrect {
+    background-color: #d32f2f; /* Red */
+    color: white;
+    border-color: #d32f2f;
+}
+
+#results {
+    margin-top: 2rem;
+}

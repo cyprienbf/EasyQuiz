@@ -1,0 +1,41 @@
+{
+  "title": "General Knowledge Quiz",
+  "image_url": "https://via.placeholder.com/150",
+  "time_limit": 120,
+  "questions": [
+    {
+      "type": "true_false",
+      "text": "The earth is flat.",
+      "answer": false
+    },
+    {
+      "type": "multiple_choice",
+      "text": "What is the capital of France?",
+      "options": [
+        "London",
+        "Berlin",
+        "Paris",
+        "Madrid",
+        "Rome"
+      ],
+      "answer": "Paris"
+    },
+    {
+      "type": "true_false",
+      "text": "Go is a statically typed language.",
+      "answer": true
+    },
+    {
+        "type": "multiple_choice",
+        "text": "Which planet is known as the Red Planet?",
+        "options": [
+          "Earth",
+          "Mars",
+          "Jupiter",
+          "Saturn",
+          "Venus"
+        ],
+        "answer": "Mars"
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+    <main class="container">
+        <header style="display: flex; align-items: center;">
+            <img src="{{.ImageURL}}" alt="Quiz Logo" class="logo">
+            <h1>{{.Title}}</h1>
+        </header>
+
+        <div id="quiz-start">
+            <button id="start-btn">Start Quiz</button>
+        </div>
+
+        <div id="quiz-container" style="display: none;">
+            <div style="display: flex; justify-content: space-between;">
+                <h2 id="question-text"></h2>
+                <h2 id="timer"></h2>
+            </div>
+            <div id="options-container"></div>
+            <p id="feedback"></p>
+        </div>
+
+        <div id="results" style="display: none;">
+            <h2>Quiz Finished!</h2>
+            <p>Your final score is: <strong id="score"></strong></p>
+            <p><strong id="score-message"></strong></p>
+            <button onclick="location.reload()">Play Again</button>
+        </div>
+    </main>
+
+    <script>
+        const quizData = {{.QuestionsJSON}};
+        const timeLimit = {{.TimeLimit}};
+
+        const startBtn = document.getElementById('start-btn');
+        const quizStartContainer = document.getElementById('quiz-start');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const timerEl = document.getElementById('timer');
+        const scoreEl = document.getElementById('score');
+        const scoreMessageEl = document.getElementById('score-message');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = timeLimit;
+
+        startBtn.addEventListener('click', startQuiz);
+
+        function startQuiz() {
+            quizStartContainer.style.display = 'none';
+            quizContainer.style.display = 'block';
+            startTimer();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const question = quizData[currentQuestionIndex];
+            questionText.innerText = question.text;
+
+            if (question.type === 'true_false') {
+                const trueButton = document.createElement('button');
+                trueButton.innerText = 'True';
+                trueButton.classList.add('option');
+                trueButton.addEventListener('click', () => selectAnswer(true));
+
+                const falseButton = document.createElement('button');
+                falseButton.innerText = 'False';
+                falseButton.classList.add('option');
+                falseButton.addEventListener('click', () => selectAnswer(false));
+
+                optionsContainer.appendChild(trueButton);
+                optionsContainer.appendChild(falseButton);
+            } else if (question.type === 'multiple_choice') {
+                question.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.innerText = option;
+                    button.classList.add('option');
+                    button.addEventListener('click', () => selectAnswer(option));
+                    optionsContainer.appendChild(button);
+                });
+            }
+        }
+
+        function resetState() {
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(selectedAnswer) {
+            const correct = quizData[currentQuestionIndex].answer;
+            const isCorrect = selectedAnswer === correct;
+
+            if (isCorrect) {
+                score++;
+            }
+
+            Array.from(optionsContainer.children).forEach(button => {
+                const answer = button.innerText === 'True' ? true : (button.innerText === 'False' ? false : button.innerText);
+                if (answer === correct) {
+                    button.classList.add('correct');
+                } else if (answer === selectedAnswer) {
+                    button.classList.add('incorrect');
+                }
+                button.disabled = true;
+            });
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizData.length) {
+                    showQuestion();
+                } else {
+                    endQuiz();
+                }
+            }, 1500);
+        }
+
+        function startTimer() {
+            timerEl.textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function endQuiz() {
+            clearInterval(timer);
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            scoreEl.innerText = `${score} / ${quizData.length}`;
+
+            const percentage = (score / quizData.length) * 100;
+            let message = '';
+            if (percentage === 100) {
+                message = 'Excellent! You got a perfect score!';
+            } else if (percentage >= 75) {
+                message = 'Great job! You know your stuff.';
+            } else if (percentage >= 50) {
+                message = 'Good try! You can do better.';
+            } else {
+                message = 'Keep practicing!';
+            }
+            scoreMessageEl.innerText = message;
+        }
+    </script>
+</body>
+</html>
